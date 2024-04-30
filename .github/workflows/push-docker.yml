@@ -1,0 +1,35 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOCKERHUB_USERNAME: "your-dockerhub-username"
+  DOCKERHUB_PASSWORD:
+    secure: "your-encrypted-dockerhub-password"
+
+build_image:
+  stage: build
+  image: docker:19.03.12
+  services:
+    - docker:19.03.12-dind
+  before_script:
+    - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+  script:
+    - docker build -t $DOCKERHUB_USERNAME/my-demo-app:latest -f Dockerfile .
+    - docker push $DOCKERHUB_USERNAME/my-demo-app:latest
+
+test_app:
+  stage: test
+  script:
+    - echo "Running tests..."  # Add your test commands here
+
+deploy_to_production:
+  stage: deploy
+  script:
+    - echo "Deploying to production..."  # Add your deployment commands here
+  environment:
+    name: production
+  when: manual
+  only:
+    - master
